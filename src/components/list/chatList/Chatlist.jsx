@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-
+import Adduser from "./addUser/addUser";
 const Chatlist = () => {
-  const [adduser , setAdduser] = useState(false)
+  const [add , setAdd] = useState(false)
   return (
     // chatlist container
     <div className="flex-1 overflow-auto"> 
@@ -11,8 +11,8 @@ const Chatlist = () => {
           <img className="w-5 h-5" src="./search.png" alt="" />
           <input className="bg-transparent border-none outline-none color-white flex-1" type="text" placeholder="search" />
         </div>
-        <img className="w-9 h-9 bg-[#11192880] p-[10px] rounded-[10px] cursor-pointer" src= { adduser ? "./minus.png":"./plus.png"} 
-        onClick={ () => setAdduser((prev)=>!prev)}
+        <img className="w-9 h-9 bg-[#11192880] p-[10px] rounded-[10px] cursor-pointer" src= { add ? "./minus.png":"./plus.png"} 
+        onClick={ () => setAdd((prev)=>!prev)}
         alt="" />
       </div>
       {/* items == users chats*/}
@@ -71,6 +71,7 @@ const Chatlist = () => {
           </p>
         </div>
       </div>
+      {add && <Adduser/>}
     </div>
   );
 };

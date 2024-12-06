@@ -7,7 +7,7 @@ import Notification from "./components/notification/Notification";
 import React from "react";
 
 const App = () => {
-  const user = false;
+  const user = true;
   return (
     <div className="container">
       {user ? (
