@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
-
+import { auth } from "../../lib/firebase";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 const Login = () => {
   const [avatar, setAvatar] = useState({
     file: null,
@@ -18,6 +19,21 @@ const Login = () => {
   const handleLogin = (e) => {
     e.preventDefault()
       toast.success("You are Logged In")
+  }
+
+  const handleRegister = async (e) => {
+    e.preventDefault()
+
+    const formData = new FormData(e.target)
+
+    const {username , email , password } =  Object.fromEntries(formData)
+     try {
+      const res = await createUserWithEmailAndPassword(auth , email , password )
+    } catch (error) {
+      console.log(error)
+      toast.error(error.message)
+    }
+
   }
   return (
     <div className="w-full h-full flex items-center gap-[100px]">
@@ -49,7 +65,7 @@ const Login = () => {
       {/* Second section */}
       <div className="flex-1 flex flex-col items-center gap-5">
         <h2 className="text-lg font-bold">Create Account</h2>
-        <form className="flex flex-col items-center justify-center gap-5">
+        <form onSubmit={handleRegister} className="flex flex-col items-center justify-center gap-5">
           <label
             htmlFor="file"
             className="w-full flex items-center justify-between cursor-pointer underline decoration-1 "
@@ -71,16 +87,19 @@ const Login = () => {
             className="p-5 border-none outline-none bg-[rgba(17,25,40,0.6)] text-white rounded-[5px]"
             type="text"
             placeholder="Enter Your Full Name"
+            name="username"
           />
           <input
             className="p-5 border-none outline-none bg-[rgba(17,25,40,0.6)] text-white rounded-[5px]"
             type="text"
             placeholder="Enter Your Email"
+            name="email"
           />
           <input
             className="p-5 border-none outline-none bg-[rgba(17,25,40,0.6)] text-white rounded-[5px]"
             type="password"
             placeholder="Enter Your Password"
+            name="password"
           />
           <button className="w-full p-5 border-none bg-[#1f8ef1] text-white rounded-[5px] cursor-pointer font-medium">
             Sign Up
