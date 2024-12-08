@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { toast } from "react-toastify";
 import { auth } from "../../lib/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import { db } from "../../lib/firebase";
+import { setDoc, doc } from "firebase/firestore";
 const Login = () => {
   const [avatar, setAvatar] = useState({
     file: null,
@@ -17,32 +19,44 @@ const Login = () => {
     }
   };
   const handleLogin = (e) => {
-    e.preventDefault()
-      toast.success("You are Logged In")
-  }
+    e.preventDefault();
+    toast.success("You are Logged In");
+  };
 
   const handleRegister = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    const formData = new FormData(e.target)
+    const formData = new FormData(e.target);
 
-    const {username , email , password } =  Object.fromEntries(formData)
-     try {
-      const res = await createUserWithEmailAndPassword(auth , email , password )
+    const { username, email, password } = Object.fromEntries(formData);
+    try {
+      const res = await createUserWithEmailAndPassword(auth, email, password);
+
+      await setDoc(doc(db, "user", res.user.uid), {
+        username,
+        email,
+        id: res.user.uid,
+        blocked: [],
+      });
+
+      await setDoc(doc(db, "userchats", res.user.uid), {
+        chats: [],
+      });
+      toast.success("You are Signup now");
     } catch (error) {
-      console.log(error)
-      toast.error(error.message)
+      console.log(error);
+      toast.error(error.message);
     }
-
-  }
+  };
   return (
     <div className="w-full h-full flex items-center gap-[100px]">
       {/* First section */}
       <div className="flex-1 flex flex-col items-center gap-5">
         <h2 className="text-lg font-bold">Welcome Back</h2>
-        <form 
-        onSubmit={handleLogin}
-        className="flex flex-col items-center justify-center gap-5">
+        <form
+          onSubmit={handleLogin}
+          className="flex flex-col items-center justify-center gap-5"
+        >
           <input
             className="p-5 border-none outline-none bg-[rgba(17,25,40,0.6)] text-white rounded-[5px]"
             type="text"
@@ -65,7 +79,10 @@ const Login = () => {
       {/* Second section */}
       <div className="flex-1 flex flex-col items-center gap-5">
         <h2 className="text-lg font-bold">Create Account</h2>
-        <form onSubmit={handleRegister} className="flex flex-col items-center justify-center gap-5">
+        <form
+          onSubmit={handleRegister}
+          className="flex flex-col items-center justify-center gap-5"
+        >
           <label
             htmlFor="file"
             className="w-full flex items-center justify-between cursor-pointer underline decoration-1 "
@@ -75,7 +92,7 @@ const Login = () => {
               src={avatar.url || "./avatar.png"}
               alt=""
             />
-            Upload your file
+            Upload your Image
           </label>
           <input
             id="file"
