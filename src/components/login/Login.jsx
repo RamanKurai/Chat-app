@@ -1,14 +1,18 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
 import { auth } from "../../lib/firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword  } from "firebase/auth";
 import { db } from "../../lib/firebase";
 import { setDoc, doc } from "firebase/firestore";
+import Upload from "../upload/Upload";
 const Login = () => {
+  const bucketId = "6755c48800110a0fe0fe";
   const [avatar, setAvatar] = useState({
     file: null,
     url: "",
   });
+
+  const [loading, setLoading] = useState(false);
 
   const handleAvatar = (e) => {
     if (e.target.files[0]) {
@@ -18,21 +22,40 @@ const Login = () => {
       });
     }
   };
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    const formData = new FormData(e.target);
+
+    const { email, password } = Object.fromEntries(formData);
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (error) {
+      console.log(error);
+      toast.error(error.message);
+    }
+    finally{
+      setLoading(false)
+    }
     toast.success("You are Logged In");
   };
 
   const handleRegister = async (e) => {
     e.preventDefault();
-
+    setLoading(true);
     const formData = new FormData(e.target);
 
     const { username, email, password } = Object.fromEntries(formData);
     try {
       const res = await createUserWithEmailAndPassword(auth, email, password);
 
+      let imgUrl = null;
+      if (avatar.file) {
+        imgUrl = await Upload(avatar.file, bucketId);
+      }
       await setDoc(doc(db, "user", res.user.uid), {
+        avatar: imgUrl || null,
         username,
         email,
         id: res.user.uid,
@@ -46,6 +69,8 @@ const Login = () => {
     } catch (error) {
       console.log(error);
       toast.error(error.message);
+    } finally {
+      setLoading(false);
     }
   };
   return (
@@ -61,14 +86,20 @@ const Login = () => {
             className="p-5 border-none outline-none bg-[rgba(17,25,40,0.6)] text-white rounded-[5px]"
             type="text"
             placeholder="Enter Your Email"
+            name="email"
           />
           <input
             className="p-5 border-none outline-none bg-[rgba(17,25,40,0.6)] text-white rounded-[5px]"
             type="password"
             placeholder="Enter Your Password"
+            name="password"
           />
-          <button className="w-full p-5 border-none bg-[#1f8ef1] text-white rounded-[5px] cursor-pointer font-medium">
-            Sign In
+          <button
+            disabled={loading}
+            className="w-full p-5 border-none bg-[#1f8ef1] text-white rounded-[5px] cursor-pointer font-medium
+           disabled:cursor-not-allowed disabled:bg-[#1f8ff19c]"
+          >
+            {loading ? "Loading" : "Sign In"}
           </button>
         </form>
       </div>
@@ -118,8 +149,12 @@ const Login = () => {
             placeholder="Enter Your Password"
             name="password"
           />
-          <button className="w-full p-5 border-none bg-[#1f8ef1] text-white rounded-[5px] cursor-pointer font-medium">
-            Sign Up
+          <button
+            disabled={loading}
+            className="w-full p-5 border-none bg-[#1f8ef1] text-white rounded-[5px] cursor-pointer font-medium
+          disabled:cursor-not-allowed disabled:bg-[#1f8ff19c]"
+          >
+            {loading ? "Loading" : "Sign Up"}
           </button>
         </form>
       </div>
